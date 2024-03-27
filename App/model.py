@@ -10,6 +10,8 @@ from DISClib.Algorithms.Sorting import selectionsort as se
 from DISClib.Algorithms.Sorting import mergesort as merg
 from DISClib.Algorithms.Sorting import quicksort as quk
 assert cf
+import datetime
+
 
 """
 Se define la estructura de un catálogo de videos. El catálogo tendrá
@@ -65,13 +67,30 @@ def data_size(data_structs):
     #TODO: Crear la función para obtener el tamaño de una lista
     pass
 
+def filtrar_datos_por_clave(datos, clave, valor):
+    datos_filtrados = {}
+    for indice, fila in datos.items():
+        if fila.get(clave) == valor:
+            datos_filtrados[indice] = fila
+    return datos_filtrados
 
-def req_1(data_structs):
+
+def req_1(Cod_pais,Nivel_exp,data):
     """
     Función que soluciona el requerimiento 1
     """
     # TODO: Realizar el requerimiento 1
-    pass
+    if Nivel_exp =='' :
+        print('ingrese valor de Nivel de experticia valido')
+        pass
+    else:
+        if Cod_pais=='':
+            data_rq1 = filtrar_datos_por_clave(data, 'experience_level', Nivel_exp)
+        else:
+            data_rq1 = filtrar_datos_por_clave(data, 'country_code', Cod_pais)
+            data_rq1 = filtrar_datos_por_clave(data_rq1, 'experience_level', Nivel_exp)
+
+    return data_rq1
 
 
 def req_2(data_structs):

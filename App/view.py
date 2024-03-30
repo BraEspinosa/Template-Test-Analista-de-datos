@@ -29,7 +29,8 @@ def new_controller():
         Se crea una instancia del controlador
     """
     #TODO: Llamar la función del controlador donde se crean las estructuras de datos
-    pass
+    control = controller.new_controller()
+    return control
 
 
 def print_menu():
@@ -47,47 +48,25 @@ def load_data(control):
     Carga los datos
     """
     #TODO: Realizar la carga de datos
-    archivo = cf.data_dir + "large-jobs.csv"
 
-    global datos_modificados
-    datos_modificados = {}
-    with open(archivo, newline='', encoding='utf-8') as csvfile:
-        lector_csv = csv.DictReader(csvfile, delimiter=';')
-        for indice, fila in enumerate(lector_csv):
-            fila_modificada = {}
-            for clave, valor in fila.items():
-                if valor.strip() == '':
-                    # Si el valor está en blanco, reemplazar por "DESCONOCIDO"
-                    fila_modificada[clave] = 'DESCONOCIDO'
-                else:
-                    fila_modificada[clave] = valor
-            datos_modificados[indice] = fila_modificada
-    return datos_modificados
+    pass
 
 def print_loaded_data(data):
 
-    lista_de_filas = [list(fila.values()) for fila in data.values()]
-    total_ofertas = len(lista_de_filas)
-    primeros_tres_datos = lista_de_filas[:3]
-    ultimos_tres_datos = lista_de_filas[-3:]
-    lista_de_filas = primeros_tres_datos + ultimos_tres_datos
-    print(lista_de_filas)
+    data_list = [list(fila.values()) for fila in data.values()]
+    # total_ofertas = len(data_list)
+    total_ofertas = controller.model.data_size(data)
+    data_first = data_list[:3]
+    data_last = data_list[-3:]
+    data_list_zip = data_first + data_last
+    # print(data_list_zip)
     encabezados = list(data.values())[0].keys()
-    tabla = tabulate(lista_de_filas, headers=encabezados, tablefmt="grid")
+    tabla = tabulate(data_list_zip, headers=encabezados, tablefmt="grid")
     print("El valor total de ofertas disponibles es de =")
     print(total_ofertas)
 
     print(tabla)
 
-def contar_filas_por_valor_de_clave(data,clave):
-    conteo = {}
-    for fila in data.values():
-        valor = fila.get(clave)
-        if valor in conteo:
-            conteo[valor] += 1
-        else:
-            conteo[valor] = 1
-    return conteo
 
 def print_data(control, id):
     pass
@@ -98,30 +77,54 @@ def print_req_1(data,N_registros):
     """
     # TODO: Imprimir el resultado del requerimiento 1
 
-    lista_de_filas = [list(fila.values()) for fila in data.values()]
+    data_list = [list(fila.values()) for fila in data.values()]
     N=int(N_registros)
-    total_ofertas = len(lista_de_filas)
-    ultimos_datos = lista_de_filas[-N:]
-    lista_de_filas = ultimos_datos
+    total_ofertas = controller.model.data_size(data)
+    last_n_data = data_list[-N:]
+    if len(last_n_data) > 10:
+        data_first = last_n_data[:5]
+        data_last = last_n_data[-5:]
+        data_list_zip = data_first + data_last
+    else:
+        data_list_zip = last_n_data
     encabezados = list(data.values())[0].keys()
-    tabla = tabulate(lista_de_filas, headers=encabezados, tablefmt="grid")
-    conteo_por_ciudad = contar_filas_por_valor_de_clave(data,'country_code')
+    tabla = tabulate(data_list_zip, headers=encabezados, tablefmt="grid")
+    pais_count = controller.count(data,'country_code')
 
     print("El valor total de ofertas disponibles mediante este filtro es de =")
     print(total_ofertas)
     print("El valor total de ofertas disponibles en cada ciudad es de =")
-    print(conteo_por_ciudad)
+    print(pais_count)
 
     print(tabla)
 
 
 
-def print_req_2(control):
+def print_req_2(data,N_registros):
     """
         Función que imprime la solución del Requerimiento 2 en consola
     """
     # TODO: Imprimir el resultado del requerimiento 2
-    pass
+    data_list = [list(fila.values()) for fila in data.values()]
+    N=int(N_registros)
+    total_ofertas = controller.model.data_size(data)
+    last_n_data = data_list[-N:]
+    if len(last_n_data) > 10:
+        data_first = last_n_data[:5]
+        data_last = last_n_data[-5:]
+        data_list_zip = data_first + data_last
+    else:
+        data_list_zip = last_n_data
+    encabezados = list(data.values())[0].keys()
+    tabla = tabulate(data_list_zip, headers=encabezados, tablefmt="grid")
+    pais_count = controller.count(data,'country_code')
+
+    print("El valor total de ofertas disponibles mediante este filtro es de =")
+    print(total_ofertas)
+    print("El valor total de ofertas disponibles en cada ciudad es de =")
+    print(pais_count)
+
+    print(tabla)
 
 
 # Se crea el controlador asociado a la vista
@@ -135,6 +138,10 @@ if __name__ == "__main__":
     working = True
     working_rq1 = True
     working_rq2 = True
+    archivo_jobs = cf.data_dir + "small-jobs.csv"
+    data_jobs = ''
+    data_skills = ''
+    archivo_skills = cf.data_dir + "small-skills.csv"
     #ciclo del menu
     while working:
         print_menu()
@@ -142,46 +149,70 @@ if __name__ == "__main__":
         if int(inputs) == 1:
             print("Cargando información de los archivos ....\n")
             inicio_load = datetime.datetime.now()
-            data = load_data(control)
-            print_loaded_data(data)
+            control['data_jobs'] = controller.load_data(control['data_jobs'],archivo_jobs)
+            data_jobs = control['data_jobs']
+            control['data_skills'] = controller.load_data(control['data_skills'],archivo_jobs)
+            data_skills = control['data_skills']
+            print_loaded_data(data_jobs)
             fin_load = datetime.datetime.now()
             duracion = fin_load - inicio_load
             print(f"La función load_data tardó {duracion.total_seconds()} segundos en ejecutarse.")
 
 
         elif int(inputs) == 2:
-            print("Listar N ofertas de trabajo segun pais y nivel de experticia")
-            while working_rq1:
-                data_rq1={}
-                print("* = campos obligatorios")
-                
-                N_registros = input('*Valor de registros consultar (Valores admitidos 3, 5, 10 o 20):\n')
-                Cod_pais = input('Codigo del pais preferible a consultar(ej: PL, CO, ES, etc):\n')
-                Nivel_exp = input('*Nivel de experticia a consultar(junior, mid o senior):\n')
-                inicio_rq1 = datetime.datetime.now()
+            if data_jobs !='':
+                print("Listar N ofertas de trabajo segun pais y nivel de experticia")
+                while working_rq1:
+                    data_rq1={}
+                    print("* = campos obligatorios")
+                    
+                    N_registros = input('*Valor de registros consultar (ej: 3, 5, 10 o 20):\n')
+                    Cod_pais = input('Codigo del pais preferible a consultar(ej: PL, CO, ES, etc):\n')
+                    Nivel_exp = input('*Nivel de experticia a consultar(junior, mid o senior):\n')
+                    inicio_rq1 = datetime.datetime.now()
+                    data_rq1=controller.req_1(Cod_pais,Nivel_exp,data_jobs)
 
-                if N_registros == 3 or N_registros == 5 or N_registros == 10 or N_registros == 20:
-                    if Nivel_exp =='' :
-                        print('ingrese valor de Número de registros valido')
+                    print_req_1(data_rq1,N_registros)
+                    fin_rq1 = datetime.datetime.now()
+                    duracion = fin_rq1 - inicio_rq1
+                    print(f"La función rq1 tardó {duracion.total_seconds()} segundos en ejecutarse.")
+
+                    Next_consulta = input('*Desea realizar otra consulta? SI/NO:\n')
+                    if Next_consulta == "SI":
                         pass
-                else:
-                    data_rq1=model.req_1(Cod_pais,Nivel_exp,data)
-
-                print_req_1(data_rq1,N_registros)
-                fin_rq1 = datetime.datetime.now()
-                duracion = fin_rq1 - inicio_rq1
-                print(f"La función rq1 tardó {duracion.total_seconds()} segundos en ejecutarse.")
-
-                Next_consulta = input('*Desea realizar otra consulta? SI/NO:\n')
-                if Next_consulta == "SI":
-                    pass
-                else:
-                    break
-
+                    else:
+                        break
+            else:
+                print("Data vacia, verifique y cargue la informacion")
+                pass
 
         elif int(inputs) == 3:
-            print_req_2(control)
+            if data_jobs !='':
 
+                print("Listar N ofertas de trabajo segun pais y nivel de experticia")
+                while working_rq2:
+                    data_rq2={}
+                    print("* = campos obligatorios")
+                    
+                    N_paises = input('*Numero de paises a consultar (ej: 3, 5, 10 o 20):\n')
+                    Año_consulta = input('*Número de año de consulta (entre 1900 a 2024):\n')
+                    Mes_consulta = input('*Número del mes de consulta :\n')
+                    inicio_rq2 = datetime.datetime.now()
+                    data_rq2=controller.req_2(N_paises,Año_consulta,Mes_consulta,data_jobs,data_skills)
+
+                    print_req_2(data_rq2,N_paises)
+                    fin_rq2 = datetime.datetime.now()
+                    duracion = fin_rq2 - inicio_rq2
+                    print(f"La función rq1 tardó {duracion.total_seconds()} segundos en ejecutarse.")
+
+                    Next_consulta = input('*Desea realizar otra consulta? SI/NO:\n')
+                    if Next_consulta == "SI":
+                        pass
+                    else:
+                        break
+            else:
+                print("Data vacia, verifique y cargue la informacion")
+                pass
         elif int(inputs) == 0:
             working = False
             print("\nGracias por utilizar el programa")

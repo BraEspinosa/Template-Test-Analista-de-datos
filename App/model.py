@@ -27,7 +27,8 @@ def new_data_structs():
     manera vacía para posteriormente almacenar la información.
     """
     #TODO: Inicializar las estructuras de datos
-    pass
+    model = []
+    return model
 
 
 # Funciones para agregar informacion al modelo
@@ -65,32 +66,16 @@ def data_size(data_structs):
     Retorna el tamaño de la lista de datos
     """
     #TODO: Crear la función para obtener el tamaño de una lista
-    pass
+    total_ofertas = len(data_structs)
 
-def filtrar_datos_por_clave(datos, clave, valor):
-    datos_filtrados = {}
-    for indice, fila in datos.items():
-        if fila.get(clave) == valor:
-            datos_filtrados[indice] = fila
-    return datos_filtrados
+    return total_ofertas
 
-
-def req_1(Cod_pais,Nivel_exp,data):
+def req_1(data_structs):
     """
     Función que soluciona el requerimiento 1
     """
     # TODO: Realizar el requerimiento 1
-    if Nivel_exp =='' :
-        print('ingrese valor de Nivel de experticia valido')
-        pass
-    else:
-        if Cod_pais=='':
-            data_rq1 = filtrar_datos_por_clave(data, 'experience_level', Nivel_exp)
-        else:
-            data_rq1 = filtrar_datos_por_clave(data, 'country_code', Cod_pais)
-            data_rq1 = filtrar_datos_por_clave(data_rq1, 'experience_level', Nivel_exp)
-
-    return data_rq1
+    pass
 
 
 def req_2(data_structs):
